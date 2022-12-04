@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ads_table="ads"
+ads_table="ads4"
 #Define multi-character delimiter
 delimiter="####"
 
@@ -14,6 +14,7 @@ for inputfile in $(ls ./input); do
   ###############################
   table_name="t${inputfile}"
   add_date="$(echo ${table_name} | sed -E "s|.*([0-9][0-9][0-9][0-9])([0-9][0-9])([0-9][0-9])_.*|\1-\2-\3|")"
+  echo ${add_date}
   echo "creating table ${table_name}"
   query="CREATE TABLE ${table_name} ( "
   query+='`asID` varchar(255), '
@@ -90,7 +91,6 @@ for inputfile in $(ls ./input); do
   echo "Adding data to input table."
   echo "${query}" > query.sql
   run_query query.sql
-exit 0
   
   # Update the ads table
   ###############################
@@ -100,6 +100,18 @@ exit 0
   query+="\`${table_name}\`);"
   echo "Erasing end date in ads table for reappearing ads."
   echo ${query} > query.sql
+  cat query.sql
+  run_query query.sql
+
+  # active ads in the ads table not present in the input table must be updated with End_Date
+  query="UPDATE \`${ads_table}\` SET "
+  query+='`End_Date`='
+  query+="'${add_date}'"
+  query+=' WHERE `End_Date` IS NULL AND `asID` NOT IN (SELECT `asID` FROM '
+  query+="\`${table_name}\`);"
+  echo "Closing ads no longer in the input."
+  echo ${query} > query.sql
+  cat query.sql
   run_query query.sql
 
   # remove ads from input already in ads table
@@ -108,6 +120,7 @@ exit 0
   query+="\`${ads_table}\`);"
   echo "Removing ads from input table already in ads table."
   echo ${query} > query.sql
+  cat query.sql
   run_query query.sql
 
   # insert input table records in case of new ads
@@ -117,13 +130,16 @@ exit 0
   query+="FROM \`${table_name}\`;"
   echo "Adding new ads to ads table."
   echo ${query} > query.sql
+  cat query.sql
   run_query query.sql
 
   # delete input table
   echo "DROP TABLE  \`${table_name}\`;" > query.sql
   echo "Removing temporary input table."
+  cat query.sql
   run_query query.sql
 
 done
 
 echo "all input files complete"
+
