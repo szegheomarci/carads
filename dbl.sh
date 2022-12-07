@@ -17,6 +17,7 @@ for inputfile in $(ls ./input); do
   echo ${add_date}
   echo "creating table ${table_name}"
   query="CREATE TABLE ${table_name} ( "
+  query+='`id` INT NOT NULL AUTO_INCREMENT, '
   query+='`asID` varchar(255), '
   query+='`Title` varchar(255), ' 
   query+='`Subtitle` varchar(255), '
@@ -31,7 +32,8 @@ for inputfile in $(ls ./input); do
   query+='`Color` varchar(255), '
   query+='`PriceEuro` INT, '
   query+='`MileageKm` INT, '
-  query+='`Start_Date` DATE);'
+  query+='`Start_Date` DATE, '
+  query+='PRIMARY KEY (`id`));'
   echo ${query} > query.sql
   run_query query.sql
 
@@ -92,6 +94,10 @@ for inputfile in $(ls ./input); do
   echo "${query}" > query.sql
   run_query query.sql
   
+  # remove duplicate entries in the input table
+  echo "DELETE t1 FROM ${table_name} t1 INNER JOIN ${table_name} t2 WHERE t1.id < t2.id AND t1.asID = t2.asID;" > query.sql
+  run_query query.sql
+  
   # Update the ads table
   ###############################
   # all ads present in the input table must have NULL End_Date in the ads table
@@ -100,7 +106,6 @@ for inputfile in $(ls ./input); do
   query+="\`${table_name}\`);"
   echo "Erasing end date in ads table for reappearing ads."
   echo ${query} > query.sql
-  cat query.sql
   run_query query.sql
 
   # active ads in the ads table not present in the input table must be updated with End_Date
@@ -111,7 +116,6 @@ for inputfile in $(ls ./input); do
   query+="\`${table_name}\`);"
   echo "Closing ads no longer in the input."
   echo ${query} > query.sql
-  cat query.sql
   run_query query.sql
 
   # remove ads from input already in ads table
@@ -120,7 +124,6 @@ for inputfile in $(ls ./input); do
   query+="\`${ads_table}\`);"
   echo "Removing ads from input table already in ads table."
   echo ${query} > query.sql
-  cat query.sql
   run_query query.sql
 
   # insert input table records in case of new ads
@@ -130,13 +133,11 @@ for inputfile in $(ls ./input); do
   query+="FROM \`${table_name}\`;"
   echo "Adding new ads to ads table."
   echo ${query} > query.sql
-  cat query.sql
   run_query query.sql
 
   # delete input table
   echo "DROP TABLE  \`${table_name}\`;" > query.sql
   echo "Removing temporary input table."
-  cat query.sql
   run_query query.sql
 
 done
