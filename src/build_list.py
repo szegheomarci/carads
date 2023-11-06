@@ -12,3 +12,11 @@ def read_delimited_file(file_path, delimiter, keys):
             # Append the dictionary to the list
             data.append(row_dict)
     return data
+
+
+def from_file():
+    pass
+
+
+def from_kafka():
+    pass

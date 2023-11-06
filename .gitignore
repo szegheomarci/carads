@@ -1,1 +1,5 @@
 .idea/
+input/
+processed/
+**/__pycache__/**
+src/config/config.yaml
