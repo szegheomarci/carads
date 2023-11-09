@@ -1,0 +1,10 @@
+source:
+  type: file
+  format: dsv
+  delimiter: "####"
+database:
+  host: @hostaddress@
+  port: @port@
+  user: @user@
+  password: @password@
+  database: @dbname@
