@@ -1,7 +1,7 @@
 import os
 import time
 
-from src.readers.AbstractReaderPublisher import ReaderPublisher
+from app.readers.AbstractReaderPublisher import ReaderPublisher
 
 
 class FileReader(ReaderPublisher):
