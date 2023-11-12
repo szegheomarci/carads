@@ -33,7 +33,6 @@ pipeline {
                         //currentBuild.result = score >= 8 ? 'SUCCESS' : 'FAILURE'
                      //   currentBuild.result = 'SUCCESS'
                     //}
-                    echo "move on"
                 }
             }
         }
@@ -52,6 +51,11 @@ pipeline {
                 ]) {
                     sh "chmod +x test/createconfig.sh && test/createconfig.sh"
                 }
+            }
+        }
+        stage('Run the container') {
+            steps {
+                sh "chmod +x test/runcontainer.sh && test/runcontainer.sh '${projectVersion}' '${env.BUILD_NUMBER}'"
             }
         }
     }
