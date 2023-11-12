@@ -1,5 +1,5 @@
 .idea/
-input/
-processed/
+app/input/
+app/processed/
 **/__pycache__/**
-src/config/config.yaml
+app/config/config.yaml
