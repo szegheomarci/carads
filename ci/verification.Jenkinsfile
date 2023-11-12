@@ -54,5 +54,10 @@ pipeline {
                 }
             }
         }
+        stage('Run the container') {
+            steps {
+                sh "chmod +x test/runcontainer.sh && test/runcontainer.sh '${projectVersion}' '${env.BUILD_NUMBER}'"
+            }
+        }
     }
 }
