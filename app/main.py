@@ -4,8 +4,8 @@ import time
 import yaml
 import build_list
 import db_actions
-from src.db_updater import DBUpdater
-from src.file_reader import FileReader
+from db_updater import DBUpdater
+from file_reader import FileReader
 
 
 def read_files() -> None:
