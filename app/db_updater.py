@@ -2,8 +2,8 @@ import re
 
 import pymysql
 
-from src.readers.AbstractReaderObserver import ReaderObserver
-from src.readers.AbstractReaderPublisher import ReaderPublisher
+from app.readers.AbstractReaderObserver import ReaderObserver
+from app.readers.AbstractReaderPublisher import ReaderPublisher
 
 
 def format_date(prod_date):
