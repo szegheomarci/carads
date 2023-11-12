@@ -11,7 +11,7 @@ pipeline {
         stage('Read project version') {
             steps {
                 script {
-                    def projectVersion = sh(script: 'git show HEAD:src/__version__.py | grep "__version__ =" | cut -d" " -f3 | tr -d \'"\n\'', returnStdout: true).trim()
+                    def projectVersion = sh(script: 'git show HEAD:app/__version__.py | grep "__version__ =" | cut -d" " -f3 | tr -d \'"\n\'', returnStdout: true).trim()
                     echo "Project version: ${projectVersion}"
                     env.projectVersion = projectVersion
                 }
@@ -21,7 +21,7 @@ pipeline {
             steps {
                 script {
                     // Run Pylint on your Python files
-                    def pylintReport = sh(script: 'pylint src/ || true', returnStdout: true).trim()
+                    def pylintReport = sh(script: 'pylint app/ || true', returnStdout: true).trim()
 
                     // Print the Pylint report
                     echo "Pylint Report:\n${pylintReport}"
@@ -33,7 +33,6 @@ pipeline {
                         //currentBuild.result = score >= 8 ? 'SUCCESS' : 'FAILURE'
                      //   currentBuild.result = 'SUCCESS'
                     //}
-                    echo "move on"
                 }
             }
         }
@@ -52,6 +51,11 @@ pipeline {
                 ]) {
                     sh "chmod +x test/createconfig.sh && test/createconfig.sh"
                 }
+            }
+        }
+        stage('Run the container') {
+            steps {
+                sh "chmod +x test/runcontainer.sh && test/runcontainer.sh '${projectVersion}' '${env.BUILD_NUMBER}'"
             }
         }
     }
