@@ -3,6 +3,10 @@
 cd test
 pwd
 ls -l
+echo "input:"
+ls -l input
+echo "processed:"
+ls -l processed
 
 docker run  \
        -v ./config:/app/config \
