@@ -48,10 +48,28 @@ class DBUpdater(ReaderObserver):
             cursorclass=pymysql.cursors.DictCursor
         )
 
+    def __init_db(self):
+        # check if the database is already initialized
+        cursor = self.connection.cursor()
+        cursor.execute(f"SHOW TABLES LIKE 'ads'")
+        result = cursor.fetchone()
+        if not result:
+            # init the database
+            sql_file_path = 'init_db/init.sql'
+            with open(sql_file_path, "rb") as f:
+                # Split the SQL statements into separate strings.
+                sql_statements = f.read().decode().split(";")
+            sql_statements.pop()
+            for sql_statement in sql_statements:
+                cursor.execute(sql_statement)
+            self.connection.commit()
+            print("Init finished.")
+
     def __create_import_table(self):
         cursor = self.connection.cursor()
         create_table_query = f'''
         CREATE TABLE IF NOT EXISTS {self.__data_name} (
+        `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
         `asID` varchar(255),
         `Title` varchar(255),
         `Subtitle` varchar(255),
@@ -104,6 +122,7 @@ class DBUpdater(ReaderObserver):
             print(f"Error: {e}")
 
     def __do_update(self):
+        self.__init_db()
         self.__create_import_table()
         self.__insert_list()
         self.connection.ping()
@@ -115,8 +134,8 @@ class DBUpdater(ReaderObserver):
                 cursor.execute(query)
                 self.connection.commit()
                 # all ads present in the input table must have NULL End_Date in the ads table
-                query = ("UPDATE `ads` SET `End_Date`=NULL WHERE `End_Date` IS NOT NULL AND `asID` IN (SELECT `asID` "
-                         "FROM `{self.__data_name}`")
+                query = (f"UPDATE `ads` SET `End_Date`=NULL WHERE `End_Date` IS NOT NULL AND `asID` IN (SELECT `asID` "
+                         f"FROM `{self.__data_name}`)")
                 cursor.execute(query)
                 self.connection.commit()
                 # active ads in the ads table not present in the input table must be updated with End_Date
@@ -125,7 +144,7 @@ class DBUpdater(ReaderObserver):
                 cursor.execute(query)
                 self.connection.commit()
                 # remove ads from input already in ads table
-                query = f"DELETE FROM `{self.__data_name}` WHERE `asID` IN (SELECT `asID` FROM `{self.__data_name}`)"
+                query = f"DELETE FROM `{self.__data_name}` WHERE `asID` IN (SELECT `asID` FROM `ads`)"
                 cursor.execute(query)
                 self.connection.commit()
                 # insert input table records in case of new ads
