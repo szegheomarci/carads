@@ -37,7 +37,7 @@ class DSVReader(FileTypeReader):
 
     def readfile(self, filename):
         self._result = []
-        with open(filename, mode='r') as file:
+        with open(filename, mode='r', encoding='ANSI') as file:
             # Read lines from the file
             lines = file.readlines()
             # Iterate through each line in the file
