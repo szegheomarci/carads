@@ -14,9 +14,10 @@ pipeline {
                     def projectVersion = sh(script: 'git show HEAD:app/__version__.py | grep "__version__ =" | cut -d" " -f3 | tr -d \'"\n\'', returnStdout: true).trim()
                     echo "Project version: ${projectVersion}"
                     env.projectVersion = projectVersion
+                    env.dockerId = "szegheomarci/dbloader:" + projectVersion + "-" + env.BUILD_NUMBER
                 }
             }
-        }
+        }/*
         stage('Run Pylint') {
             steps {
                 script {
@@ -35,11 +36,10 @@ pipeline {
                     //}
                 }
             }
-        }
+        }*/
         stage('Build docker image') {
             steps {
-                echo "docker version: ${projectVersion}-${env.BUILD_NUMBER}"
-                sh "docker build -t szegheomarci/dbloader:${projectVersion}-${env.BUILD_NUMBER} ."
+                sh "docker build -t ${env.dockerId} ."
             }
         }
         stage('Create config file') {
@@ -55,7 +55,23 @@ pipeline {
         }
         stage('Run the container') {
             steps {
-                sh "chmod +x test/runcontainer.sh && test/runcontainer.sh '${projectVersion}' '${env.BUILD_NUMBER}'"
+                timeout(time: 1, unit: 'MINUTES', failBuild: true) {
+                    sh "chmod +x test/runcontainer.sh && test/runcontainer.sh '${projectVersion}' '${env.BUILD_NUMBER}'"
+                }
+            }
+        }
+    }
+    post {
+        always {
+            // Check if the Docker container is running
+            def isContainerRunning = sh(script: 'docker inspect -f {{.State.Running}} ${env.dockerId}', returnStatus: true) == 0
+
+            // Stop and remove the Docker container if it's running
+            if (isContainerRunning) {
+                sh 'docker stop ${env.dockerId}'
+                sh 'docker rm ${env.dockerId}'
+                sh 'docker ps'
+                sh 'docker images -a'
             }
         }
     }

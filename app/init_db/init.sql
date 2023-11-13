@@ -1,4 +1,3 @@
--- CREATE DATABASE chaz3;
 CREATE TABLE ads (
     id INT NOT NULL AUTO_INCREMENT,
     asID varchar(255),
@@ -55,21 +54,3 @@ CONCAT("W", `vWeeks`.`weeknum`, "/", `vWeeks`.`year`) AS weeknumber, `vWeeks`.`y
 FROM `vWeeks`, `ads`
 WHERE `ads`.Start_Date <= `vWeeks`.`weekend` AND (`ads`.End_Date >= `vWeeks`.`weekstart` OR `ads`.`End_Date` IS Null)
 ORDER BY `vWeeks`.`weekstart` ASC;
-
-
-
-SELECT a.`csoport`,
-(SELECT AVG(b.`ertek`)
- FROM `minta` AS b
- WHERE b.csoport = a.csoport AND
- b.id IN (SELECT
-
-FROM `minta` AS a WHERE 1
-
-SELECT `Engine`, SUBSTRING(`Engine`,1,INSTR(`Engine`,' kW')-1) as kw, COUNT(*) as ossz FROM `ads` GROUP BY `Engine`
-ORDER BY kw DESC;
-
-SELECT DISTINCT `ads`.`Engine`, SUBSTRING(`ads`.`Engine`,1,INSTR(`Engine`,' kW')-1) as kW,
-IFNULL(`engines`.`badge`,'other')
-FROM `ads`
-LEFT JOIN `engines` ON SUBSTRING(`ads`.`Engine`,1,INSTR(`Engine`,' kW')-1)=`engines`.`kW`;
