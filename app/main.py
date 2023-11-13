@@ -19,8 +19,6 @@ try:
         config = yaml.load(yaml_file, Loader=yaml.FullLoader)
         cfg_source = config["source"]
         cfg_database = config["database"]
-#        print(config.get('source').get('delimiter'))
-#        print(config['source']['delimiter'])
 except FileNotFoundError:
     print(f"File '{config_file}' not found.")
     exit(1)
@@ -44,40 +42,25 @@ if cfg_source["type"] == "file":
             files = sorted(os.listdir(file_path))
             # Check if there are files in the directory
             if files:
+                finish = False
                 for file in files:
                     print(f"processing {file_path}{file}")
+                    if file == "exit":
+                        shutil.move(file_path + file, processed_folder)
+                        finish = True
+                        break
                     results = file_reader.read(file_path + file)
                     db_updater.update_db(file.split('.')[0], results)
                     shutil.move(file_path + file, processed_folder)
+                if finish:
+                    break
             else:
                 time.sleep(60)  # Wait for a minute before checking again
         except FileNotFoundError:
-            print("Directory input not2 found.")
+            print("Directory input not found.")
         except PermissionError:
             print("You don't have permission to access ./input.")
         except Exception as e:
             print(f"An error occurred: {e}")
 elif cfg_source["type"] == "kafka":
     results = build_list.from_kafka()
-
-
-
-
-# load into database
-
-
-exit(0)
-# Example usage
-file_name = 'test/20231021_134742.txt'  # Replace 'example.txt' with your CSV file path
-input_name = 'import_20231021_134742'
-start_date = '2023-10-21'
-custom_delimiter = '####'  # Specify the custom delimiter used in your CSV file
-header_keys = ["id", "title", "subtitle", "price", "odo", "proddate", "engine", "dealer", "country", "zip",
-               "link"]  # Specify the keys for the dictionaries
-
-# read the file
-results = build_list.read_delimited_file(file_name, custom_delimiter, header_keys)
-
-db_loader = db_actions.DatabaseLoader("192.168.0.160", 3306, "chaz3app", "chaz3app", "db")
-db_loader.create_import_table(input_name, start_date)
-db_loader.insert_list(input_name, results)

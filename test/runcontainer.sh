@@ -1,8 +1,6 @@
 #!/bin/bash
 
 cd test
-pwd
-ls -l
 
 docker run  \
        -v ./config:/app/config \
