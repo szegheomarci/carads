@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     stages {
-        stage('Workspace check') {
+        stage('Clean') {
             steps {
-                sh "ls -l"
+                sh "rm -rf test/processed/*.txt"
                 sh "docker images -a"
             }
         }
@@ -66,16 +66,20 @@ pipeline {
         always {
             script {
                 cleanWs()
-             /*   // Check if the Docker container is running
+                // Check if the Docker container is running
                 def isContainerRunning = sh(script: 'docker inspect -f {{.State.Running}} ${env.dockerId}', returnStatus: true) == 0
 
-                // Stop and remove the Docker container if it's running
+                // Stop the Docker container if it's running
                 if (isContainerRunning) {
+                    echo "Stopping ${env.dockerId} container"
                     sh 'docker ps -q --filter ancestor=${env.dockerId} | xargs docker stop'
-                    sh 'docker rm ${env.dockerId}'
-                    sh 'docker ps'
-                    sh 'docker images -a'
-                }*/
+                }
+                // Remove the Docker container
+                echo "Deleting ${env.dockerId} container"
+                sh 'docker ps -a | grep \'${env.dockerId}\' | awk \'{print $1}\' | xargs docker rm'
+                echo "Deleting ${env.dockerId} image"
+                sh 'docker ps -a | grep \'${env.dockerId}\' | awk \'{print $1}\' | xargs docker rm'
+                sh 'docker images -a'
             }
         }
     }
