@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     stages {
-        stage('Clean') {
+        /*stage('Clean') {
             steps {
                 sh "rm -rf test/processed/*.txt"
                 sh "docker images -a"
             }
-        }
+        }*/
         stage('Read project version') {
             steps {
                 script {
@@ -17,7 +17,7 @@ pipeline {
                     env.dockerId = "szegheomarci/dbloader:" + projectVersion + "-" + env.BUILD_NUMBER
                 }
             }
-        }/*
+        }
         stage('Run Pylint') {
             steps {
                 script {
@@ -36,7 +36,7 @@ pipeline {
                     //}
                 }
             }
-        }*/
+        }
         stage('Build docker image') {
             steps {
                 sh "docker build -t ${env.dockerId} ."
@@ -58,7 +58,7 @@ pipeline {
                 timeout(time: 2, unit: 'MINUTES')
             }
             steps {
-                    sh "chmod +x test/runcontainer.sh && test/runcontainer.sh '${projectVersion}' '${env.BUILD_NUMBER}'"
+                    sh "chmod +x test/runcontainer.sh && test/runcontainer.sh '${env.dockerId}'"
             }
         }
     }
